@@ -1,3 +1,4 @@
 env/
+env_w2v/
 __pycache__/
 .ipynb_checkpoints/
