@@ -11,6 +11,8 @@ from sklearn.model_selection import train_test_split
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+import numpy as np
+from sklearn.feature_selection import chi2, mutual_info_classif
 
 # Fixed seed used across the ENTIRE project — never change this
 RANDOM_STATE = 42
@@ -53,3 +55,16 @@ def get_train_test_split(X, y, test_size=0.2):
         random_state=RANDOM_STATE,
         stratify=y
     )
+
+def select_top_k_terms(X_train, y_train, feature_names, k=30, method="chi2"):
+    """Rank TF-IDF terms by association with the label, using TRAINING data only.
+    Returns (column indices, term names, scores). Shared by all Tier 2 notebooks."""
+    if method == "chi2":
+        scores, _ = chi2(X_train, y_train)
+    elif method == "mutual_info":
+        scores = mutual_info_classif(X_train, y_train, random_state=RANDOM_STATE)
+    else:
+        raise ValueError("method must be 'chi2' or 'mutual_info'")
+    scores = np.nan_to_num(scores)
+    top_idx = np.argsort(scores)[::-1][:k]
+    return top_idx, np.asarray(feature_names)[top_idx], scores[top_idx]
