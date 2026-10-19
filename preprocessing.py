@@ -34,7 +34,7 @@ def preprocess_text(text):
     return " ".join(tokens)
 
 
-def get_tfidf_features(df, max_features=5000, min_df=5, max_df=0.9, ngram_range=(1, 2)):
+def get_tfidf_features(df, max_features=5000, min_df=5, max_df=0.9, ngram_range=(1, 1)):
     """Fit TF-IDF on processed text. Returns X, y, and the fitted vectorizer."""
     tfidf = TfidfVectorizer(
         ngram_range=ngram_range,
