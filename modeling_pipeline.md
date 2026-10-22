@@ -45,7 +45,7 @@ This document explains the overall modeling flow for the Fake News Detection pro
 
 **Features:** Same TF-IDF matrix as baseline — use `preprocessing.py` functions so the vectorizer settings and split are identical across every model.
 
-**Why:** These are black-box models — need post-hoc explanation methods to interpret them.
+**Why:** These are black-box models — need post-hoc explanation methods to interpret them (model might use different post-hoc depending on the mode).
 
 **Steps (same for every model in this tier):**
 1. Load cleaned data
@@ -56,7 +56,7 @@ This document explains the overall modeling flow for the Fake News Detection pro
 6. Evaluate (classification report, confusion matrix, Fake-class recall)
 7. Select top-K important terms (chi-squared or mutual information ranking — only needs to be done once, can be reused across all Tier 2 models)
    - **Correlation heatmap** — on top-K terms, check multicollinearity
-8. Apply explanation methods:
+8. Apply explanation methods (different for each model, some model might use one technique some model might not):
    - **LIME** — sanity-check individual predictions by removing words, observe probability shift
    - **PDP/ICE** — on top-K terms only (not full TF-IDF vocabulary)
    - **PFI** — confirm term importance via performance degradation (especially important for SVM, which has no native importance)
