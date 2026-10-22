@@ -28,14 +28,14 @@ This document explains the overall modeling flow for the Fake News Detection pro
 **Why:** Logistic regression is inherently interpretable — coefficients directly explain predictions. No post-hoc explanation methods needed (no LIME/SHAP/PDP/ICE).
 
 **Steps:**
-1. Set up
-2. Load cleaned data
-3. Preprocess text (`preprocess_text()` from `preprocessing.py`)
-4. TF-IDF vectorize (`get_tfidf_features()` from `preprocessing.py`)
-5. Train/test split (`get_train_test_split()` from `preprocessing.py`)
-6. Train Logistic Regression
-7. Evaluate (classification report, confusion matrix, Fake-class recall)
-8. Interpret coefficients → odds ratios (top words pushing toward fake/real)
+- Set up
+- Load cleaned data
+- Preprocess text (`preprocess_text()` from `preprocessing.py`)
+- TF-IDF vectorize (`get_tfidf_features()` from `preprocessing.py`)
+- Train/test split (`get_train_test_split()` from `preprocessing.py`)
+- Train Logistic Regression
+- Evaluate (classification report, confusion matrix, Fake-class recall)
+- Interpret coefficients → odds ratios (top words pushing toward fake/real)
 
 ---
 
@@ -48,20 +48,20 @@ This document explains the overall modeling flow for the Fake News Detection pro
 **Why:** These are black-box models — need post-hoc explanation methods to interpret them (model might use different post-hoc depending on the mode).
 
 **Steps (same for every model in this tier):**
-1. Load cleaned data
-2. Preprocess text (`preprocess_text()` — identical to baseline)
-3. TF-IDF vectorize (`get_tfidf_features()` — identical settings to baseline)
-4. Train/test split (`get_train_test_split()` — identical split to baseline)
-5. Train the model
-6. Evaluate (classification report, confusion matrix, Fake-class recall)
-7. Select top-K important terms (chi-squared or mutual information ranking — only needs to be done once, can be reused across all Tier 2 models)
+- Load cleaned data
+- Preprocess text (`preprocess_text()` — identical to baseline)
+- TF-IDF vectorize (`get_tfidf_features()` — identical settings to baseline)
+- Train/test split (`get_train_test_split()` — identical split to baseline)
+- Train the model
+- Evaluate (classification report, confusion matrix, Fake-class recall)
+- Select top-K important terms (chi-squared or mutual information ranking — only needs to be done once, can be reused across all Tier 2 models)
    - **Correlation heatmap** — on top-K terms, check multicollinearity
-8. Apply explanation methods (different for each model, some model might use one technique some model might not):
+- Apply explanation methods (different for each model, some model might use one technique some model might not):
    - **LIME** — sanity-check individual predictions by removing words, observe probability shift
    - **PDP/ICE** — on top-K terms only (not full TF-IDF vocabulary)
    - **PFI** — confirm term importance via performance degradation (especially important for SVM, which has no native importance)
    - **TreeSHAP** — for tree-based models only (Random Forest, XGBoost, LightGBM, Decision Trees)
-9. Model Summary
+- Model Summary
 
 **Best-performing model (by Fake-class recall) gets carried forward for the deepest interpretability analysis.**
 
