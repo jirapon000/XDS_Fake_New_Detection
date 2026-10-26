@@ -68,3 +68,25 @@ def select_top_k_terms(X_train, y_train, feature_names, k=30, method="chi2"):
     scores = np.nan_to_num(scores)
     top_idx = np.argsort(scores)[::-1][:k]
     return top_idx, np.asarray(feature_names)[top_idx], scores[top_idx]
+
+def get_split_tfidf(df, test_size=0.2, max_features=5000, min_df=5,
+                    max_df=0.9, ngram_range=(1, 1)):
+    """Split first, then fit TF-IDF on training text only (no leakage).
+    Returns X_train, X_test, y_train, y_test, and the fitted vectorizer."""
+    text_train, text_test, y_train, y_test = train_test_split(
+        df["processed_text"], df["label_encoded"],
+        test_size=test_size,
+        random_state=RANDOM_STATE,
+        stratify=df["label_encoded"]
+    )
+
+    tfidf = TfidfVectorizer(
+        ngram_range=ngram_range,
+        max_features=max_features,
+        min_df=min_df,
+        max_df=max_df
+    )
+    X_train = tfidf.fit_transform(text_train)   # learn vocabulary from train only
+    X_test = tfidf.transform(text_test)         # apply it to test
+
+    return X_train, X_test, y_train, y_test, tfidf
