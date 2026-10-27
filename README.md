@@ -5,8 +5,8 @@ This project applies explainable data science (XDS) techniques to fake news dete
 Each article's title and text are converted into TF-IDF word features. Author, source and category are deliberately left out, so the models judge what an article says rather than who published it. We train an interpretable baseline (logistic regression), a shallow decision tree that can be read in full, and four more complex models: Random Forest, LightGBM, XGBoost and an RBF-kernel SVM. All models share the same features and train/test split and are evaluated on Fake-class recall, the share of fake articles caught.
 
 Each model is explained with the same pipeline:
-- **Global importance:** Permutation Feature Importance (with a random-term check to separate real effects from noise) and SHAP (TreeSHAP for tree models, KernelSHAP for the SVM)
-- **Feature effects:** PDP, chosen over ALE after a correlation check showed the top terms are independent
+- **Global importance:** Grouped Permutation Feature Importance (with a random-term check to separate real effects from noise) and SHAP (TreeSHAP for tree models, KernelSHAP for the SVM)
+- **Feature effects:** ALE, chosen over ALE after a correlation check showed the top terms are independent
 - **Heterogeneity:** ICE and centered ICE
 - **Individual decisions:** LIME, SP-LIME and SHAP waterfalls, compared on the same articles
 

@@ -41,7 +41,7 @@ This document explains the overall modeling flow for the Fake News Detection pro
 
 ## Common Models (Random Forest, XGBoost, LightGBM, Decision Trees, SVM)
 
-**Notebook:** one per model, e.g. `model_random_forest.ipynb`, `model_xgboost.ipynb`, etc.
+**Notebook:** one per model, e.g. `Random_forest.ipynb`, `XGBoost.ipynb`, etc.
 
 **Features:** Same TF-IDF matrix as baseline — use `preprocessing.py` functions so the vectorizer settings and split are identical across every model.
 
@@ -58,8 +58,8 @@ This document explains the overall modeling flow for the Fake News Detection pro
    - **Correlation heatmap** — on top-K terms, check multicollinearity
 - Apply explanation methods (different for each model, some model might use one technique some model might not):
    - **LIME** — sanity-check individual predictions by removing words, observe probability shift
-   - **PDP/ICE** — on top-K terms only (not full TF-IDF vocabulary)
-   - **PFI** — confirm term importance via performance degradation (especially important for SVM, which has no native importance)
+   - **ALE/ICE** — on top-K terms only (not full TF-IDF vocabulary)
+   - **Grouped PFI** — confirm term importance via performance degradation (especially important for SVM, which has no native importance)
    - **TreeSHAP** — for tree-based models only (Random Forest, XGBoost, LightGBM, Decision Trees)
 - Model Summary
 
