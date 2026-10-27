@@ -1,69 +1,87 @@
 # Modeling Pipeline Overview
 
-This document explains the overall modeling flow for the Fake News Detection project, so every team member builds their notebook consistently.
+This document explains the overall modeling flow for the Fake News Detection project, so every notebook is built consistently.
 
-## Shared Rules (apply to every model, every notebook)
+## Data Preparation (run once, in this order)
 
-1. **Dataset:** Always load `Dataset/fake_news_dataset_cleaned.csv` (missing values already filled, `label_encoded` already created: `fake=1, real=0`).
-2. **Shared preprocessing file:** Always import from `preprocessing.py` at the project root — do not rewrite your own version of text cleaning, TF-IDF settings, or train/test split. This guarantees every model is trained/compared fairly on identical inputs.
+1. **`combine_dataset.ipynb`:** merges `Dataset/True.csv` (real, Reuters) and `Dataset/Fake.csv` (fake) into `Dataset/fake_news_combined.csv.gz`, adding `label` and `label_encoded` (`fake = 1`, `real = 0`).
+2. **`dataset_eda.ipynb`:** explores the combined data and reports problems. It changes nothing and saves nothing.
+3. **`clean_dataset.ipynb`:** fixes what the EDA found and saves `Dataset/fake_news_dataset_cleaned.csv.gz`:
+   - strips extra spaces
+   - removes the "CITY (Reuters) -" dateline from real articles
+   - drops rows with an invalid date, empty texts and duplicate texts
+
+Files are gzip-compressed to stay under GitHub's 100 MB limit; `pd.read_csv` reads them directly.
+
+## Shared Rules (apply to every model notebook)
+
+1. **Dataset:** always load `Dataset/fake_news_dataset_cleaned.csv.gz`.
+2. **Features:** title + text only. `subject` and `date` each give the label away (see the EDA), so they are never used as features.
+3. **Shared preprocessing file:** always import from `preprocessing.py`. Do not write your own text cleaning, TF-IDF settings or train/test split.
 ```python
    from preprocessing import (
-       preprocess_text, get_tfidf_features,
-       get_train_test_split, RANDOM_STATE
+       preprocess_text, get_split_tfidf,
+       select_top_k_terms, RANDOM_STATE
    )
 ```
-3. **Random seed:** Always use `RANDOM_STATE` (imported from `preprocessing.py`, currently `42`) for every model and split. Never hardcode a different value.
-4. **Train/test split:** Always use `get_train_test_split()` from `preprocessing.py` — same `test_size=0.2`, `stratify=y`, `random_state=RANDOM_STATE` every time.
-5. **Primary metric:** Recall on the **Fake** class (`label_encoded = 1`). Report using `recall_score(y_test, y_pred, pos_label=1)` 
-6. **Text preprocessing:** Use `preprocess_text()` from `preprocessing.py` — lowercase → remove punctuation/numbers → tokenize → remove stopwords → lemmatize → TF-IDF (unigrams + bigrams).
+4. **Text preprocessing:** `preprocess_text()`: lowercase → replace all punctuation and non-ASCII characters (including curly quotes) with spaces → convert accented letters → remove numbers → tokenize → remove stopwords → lemmatize.
+5. **TF-IDF and split:** `get_split_tfidf()`: stratified 80/20 split first, then TF-IDF (unigrams, up to 5,000 terms) fitted on the training text only, so no test information leaks into the vocabulary.
+6. **Random seed:** always use `RANDOM_STATE` (currently `42`). Never hardcode a different value.
+7. **Primary metric:** recall on the **Fake** class (`label_encoded = 1`), reported with `recall_score(y_test, y_pred, pos_label=1)`. Always report it with precision and accuracy, since recall alone can be maxed out by flagging everything.
 
 ---
 
 ## Baseline Model (Logistic Regression)
 
-**Notebook:** `baseline_model.ipynb`
+**Notebook:** `logistic_regression_TF-IDF.ipynb`
 
-**Features:** TF-IDF only (title + text combined). No metadata.
-
-**Why:** Logistic regression is inherently interpretable — coefficients directly explain predictions. No post-hoc explanation methods needed (no LIME/SHAP/PDP/ICE).
+**Why:** logistic regression is interpretable by design. Its coefficients explain predictions directly, so no post-hoc methods are needed.
 
 **Steps:**
-- Set up
-- Load cleaned data
-- Preprocess text (`preprocess_text()` from `preprocessing.py`)
-- TF-IDF vectorize (`get_tfidf_features()` from `preprocessing.py`)
-- Train/test split (`get_train_test_split()` from `preprocessing.py`)
-- Train Logistic Regression
+- Load the cleaned data, preprocess, TF-IDF and split (shared functions)
+- Train logistic regression
 - Evaluate (classification report, confusion matrix, Fake-class recall)
-- Interpret coefficients → odds ratios (top words pushing toward fake/real)
+- Sanity check: dummy classifier and permutation test (shuffled labels)
+- Interpret coefficients (top terms pushing toward fake and real)
+- Fingerprint check: retrain without source-fingerprint terms to see how much accuracy depends on them
 
 ---
 
-## Common Models (Random Forest, XGBoost, LightGBM, Decision Trees, SVM)
+## Readable Model (Decision Tree)
 
-**Notebook:** one per model, e.g. `Random_forest.ipynb`, `XGBoost.ipynb`, etc.
+**Notebook:** `decision_tree.ipynb`
 
-**Features:** Same TF-IDF matrix as baseline — use `preprocessing.py` functions so the vectorizer settings and split are identical across every model.
+**Why:** a depth-3 tree can be read and checked in full. Because its true rules are known, it is also used to test whether the explanation methods report them correctly.
 
-**Why:** These are black-box models — need post-hoc explanation methods to interpret them (model might use different post-hoc depending on the mode).
+**Steps:** train (depth 3, at least 50 articles per leaf) → read the tree → compare depths with cross-validation → evaluate → PFI and TreeSHAP → LIME and SHAP waterfall on single articles. PDP, ICE and SP-LIME are skipped, because the tree itself already shows what they would.
 
-**Steps (same for every model in this tier):**
-- Load cleaned data
-- Preprocess text (`preprocess_text()` — identical to baseline)
-- TF-IDF vectorize (`get_tfidf_features()` — identical settings to baseline)
-- Train/test split (`get_train_test_split()` — identical split to baseline)
+---
+
+## Black-Box Models (Random Forest, LightGBM, XGBoost, SVM)
+
+**Notebooks:** `random_forest.ipynb`, `LightGBM.ipynb`, `XGBoost.ipynb`, `SVM.ipynb`
+
+**Why:** these models can't be read directly, so they are explained with post-hoc methods.
+
+**Model-specific notes:**
+- **XGBoost** treats sparse zeros as missing values, so it is trained and explained on dense arrays.
+- **SVM** is trained on the sparse matrix (much faster with 5,000 terms). It uses `decision_function` instead of probabilities, and PFI and ALE run on a 1,000-article sample because it is slow to score.
+
+**Steps (same for every model):**
+- Load, preprocess, TF-IDF and split (shared functions)
 - Train the model
-- Evaluate (classification report, confusion matrix, Fake-class recall)
-- Select top-K important terms (chi-squared or mutual information ranking — only needs to be done once, can be reused across all Tier 2 models)
-   - **Correlation heatmap** — on top-K terms, check multicollinearity
-- Apply explanation methods (different for each model, some model might use one technique some model might not):
-   - **LIME** — sanity-check individual predictions by removing words, observe probability shift
-   - **ALE/ICE** — on top-K terms only (not full TF-IDF vocabulary)
-   - **Grouped PFI** — confirm term importance via performance degradation (especially important for SVM, which has no native importance)
-   - **TreeSHAP** — for tree-based models only (Random Forest, XGBoost, LightGBM, Decision Trees)
-- Model Summary
-
-**Best-performing model (by Fake-class recall) gets carried forward for the deepest interpretability analysis.**
+- Evaluate (classification report, confusion matrix, Fake-class recall, ROC AUC)
+- **Top-K terms:** the 30 terms most linked to the label by chi-squared on the training data (`select_top_k_terms()`), shared across all models
+- **Correlation check:** heatmap of the top-K terms, flagging pairs with |correlation| > 0.5. Several terms come as packages (photo-credit words, tweet links), which rules out methods that assume independent words.
+- **Explanation methods:**
+  - **Grouped PFI:** drop in Fake-class recall when terms are shuffled; correlated groups are shuffled together, other terms one at a time. A null check with 30 random terms separates real effects from noise.
+  - **SHAP:** TreeSHAP for tree models; KernelSHAP for the SVM (top 30 terms only)
+  - **ALE:** feature effects for the top 6 terms (used instead of PDP because of the correlation)
+  - **ICE and centered ICE:** only for top terms outside the correlated groups, since ICE has no ALE version
+  - **SP-LIME:** representative articles, chosen automatically
+  - **LIME:** the most confident caught fake, the most clearly missed fake and the most confident false alarm
+  - **SHAP waterfall:** the missed fake article, to compare with LIME on the same case
+- Model summary
 
 ---
 
@@ -75,4 +93,4 @@ This document explains the overall modeling flow for the Fake News Detection pro
 
 ## Final Comparison
 
-Once all models are trained, compare across a single table: model name, Fake-class recall, accuracy, and interpretability approach used. This becomes the basis for the project's final discussion of the accuracy–interpretability trade-off.
+All models are compared in one table: Fake-class recall, accuracy, missed fakes, false alarms and the interpretability approach used. The final discussion covers the accuracy–interpretability trade-off and, using the explanations, what the models actually rely on: writing style versus source fingerprints.
