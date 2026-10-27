@@ -2,15 +2,17 @@
 Shared preprocessing pipeline for Fake News Detection project.
 All model notebooks (baseline + Tier 2) must import from here to ensure
 identical preprocessing, TF-IDF settings, and train/test split across models.
+
+Row-level cleaning (duplicates, empty texts, Reuters dateline) is done once in
+clean_dataset.ipynb. This file only processes the text of the cleaned dataset.
 """
 
 import re
-import string
+import unicodedata
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
 import numpy as np
 from sklearn.feature_selection import chi2, mutual_info_classif
 
@@ -22,13 +24,21 @@ lemmatizer = WordNetLemmatizer()
 
 
 def preprocess_text(text):
-    """Lowercase, remove punctuation/numbers, tokenize, remove stopwords, lemmatize."""
-    text = text.lower()
-    text = re.sub(f"[{re.escape(string.punctuation)}]", " ", text)
-    text = re.sub(r"\d+", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
+    """Lowercase, remove punctuation/numbers/non-ASCII characters, tokenize,
+    remove stopwords, lemmatize.
 
-    tokens = word_tokenize(text)
+    Real (Reuters) articles use curly quotes, dashes, non-breaking spaces and
+    accented letters, while fake articles contain no non-ASCII characters at all.
+    Every non-letter character is therefore replaced with a space, so these
+    characters cannot become tokens that only appear in one class.
+    """
+    text = text.lower()
+    text = re.sub(r"[^\w\s]", " ", text)            # all punctuation, incl. ’ “ ” – — → space
+    text = (unicodedata.normalize("NFKD", text)     # accented letters → plain letters (josé → jose)
+            .encode("ascii", "ignore").decode("ascii"))
+    text = re.sub(r"[^a-z\s]", " ", text)           # numbers, underscores, anything left → space
+
+    tokens = text.split()                           # only letters and spaces remain, so split() is enough
     tokens = [lemmatizer.lemmatize(tok) for tok in tokens if tok not in stop_words]
 
     return " ".join(tokens)
@@ -56,6 +66,7 @@ def get_train_test_split(X, y, test_size=0.2):
         stratify=y
     )
 
+
 def select_top_k_terms(X_train, y_train, feature_names, k=30, method="chi2"):
     """Rank TF-IDF terms by association with the label, using TRAINING data only.
     Returns (column indices, term names, scores). Shared by all Tier 2 notebooks."""
@@ -68,6 +79,7 @@ def select_top_k_terms(X_train, y_train, feature_names, k=30, method="chi2"):
     scores = np.nan_to_num(scores)
     top_idx = np.argsort(scores)[::-1][:k]
     return top_idx, np.asarray(feature_names)[top_idx], scores[top_idx]
+
 
 def get_split_tfidf(df, test_size=0.2, max_features=5000, min_df=5,
                     max_df=0.9, ngram_range=(1, 1)):
