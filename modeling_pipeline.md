@@ -85,6 +85,25 @@ Files are gzip-compressed to stay under GitHub's 100 MB limit; `pd.read_csv` rea
 
 ---
 
+## Explanation Check
+
+Notebook: `Model/XAI Evaluation/xai_evaluation.ipynb`
+
+We chose logistic regression, but the SVM was 0.4 points more accurate. This notebook checks two things:
+
+1. **Is the SVM's lead real?** Yes, but small. It's right on 33 of the 40 articles where the two models disagree (p = 0.00004), and it misses 21 fewer fakes. Not worth losing a model that explains itself, so logistic regression stays.
+2. **Can the SVM's explanations be trusted?** Mostly yes:
+   - LIME and SHAP give the right answer on logistic regression and the decision tree, where we know the truth.
+   - Deleting LIME's top words moves the SVM's score 19.5× more than deleting random words.
+   - LIME's top word stays the same in 91% of reruns.
+   - Wrong flags are fragile: 64% are cleared by deleting 3 words or fewer, against 2.5% of correct flags.
+   - Real articles about race are wrongly flagged more often (3.6% vs 0.85%), so those flags need a human check.
+
+Outcome: the choice of logistic regression stands.
+
+---
+
+
 ## Final Comparison
 
 **Notebook:** `Model/XAI Synthesis/xai_synthesis.ipynb`

@@ -42,7 +42,7 @@ The readable decision tree also serves as a test case: because its true rules ar
 
 All models separate fake from real well, and the SVM is the most accurate. The explanations show what that accuracy rests on. Every model relies on Reuters' writing style (above all "said", plus weekdays and formal titles) and on the fake sites' page layout. The decision tree's very first question is whether an article contains "via" from a photo credit. LightGBM and XGBoost lean on the photo-credit words three times as much as the Random Forest does, while the SVM spreads its decision over thousands of words and barely depends on any single one.
 
-The models' worst mistakes show the limit. A fake site republishing a wire-style report gets through, and a real article written casually gets flagged. The models have learned to tell Reuters from these particular fake sites, which works very well within this dataset, but they judge how an article is written and laid out, not whether what it says is true.
+The models' worst mistakes show the limit. A fake site republishing a wire-style report gets through, and a real article written casually gets flagged. The models have learned to tell Reuters from these particular fake sites, which works very well within this dataset, but they judge how an article is written and laid out, not whether what it says is true. **The model we chose is logistic regression.** The SVM is slightly more accurate (0.984 vs 0.980), and `xai_evaluation.ipynb` shows that lead is real, not luck. But the gain is small: 21 fewer missed fakes out of 3,489. Logistic regression explains itself exactly through its coefficients, and it relies least on the fake sites' page layout (photo-credit and link words make up 14% of its top words, against 20% for the SVM). For a gap that small, being able to see exactly why each article was flagged is worth more.
 
 ## Project Structure
 
@@ -54,6 +54,7 @@ The models' worst mistakes show the limit. A fake site republishing a wire-style
 | 4 | `preprocessing.py` | Shared text cleaning, TF-IDF and train/test split |
 | 5 | `Model/Baseline Model/` | Logistic regression baseline |
 | 6 | `Model/Common Models/` | Decision tree, Random Forest, LightGBM, XGBoost, SVM |
+| 7 | `Model/XAI Evaluation/` | Checks whether the SVM's lead over logistic regression is real, and whether LIME and SHAP can be trusted (faithfulness, stability, counterfactuals, ethics) |
 
 ## Word Groups
 
