@@ -43,3 +43,16 @@ The readable decision tree also serves as a test case: because its true rules ar
 All models separate fake from real well, and the SVM is the most accurate. The explanations show what that accuracy rests on. Every model relies on Reuters' writing style (above all "said", plus weekdays and formal titles) and on the fake sites' page layout. The decision tree's very first question is whether an article contains "via" from a photo credit. LightGBM and XGBoost lean on the photo-credit words three times as much as the Random Forest does, while the SVM spreads its decision over thousands of words and barely depends on any single one.
 
 The models' worst mistakes show the limit. A fake site republishing a wire-style report gets through, and a real article written casually gets flagged. The models have learned to tell Reuters from these particular fake sites, which works very well within this dataset, but they judge how an article is written and laid out, not whether what it says is true.
+
+## Project Structure
+
+| Step | File | What it does |
+|---|---|---|
+| 1 | `combine_dataset.ipynb` | Merges `True.csv` and `Fake.csv` and adds the label |
+| 2 | `dataset_eda.ipynb` | Explores the data and lists problems (changes nothing) |
+| 3 | `clean_dataset.ipynb` | Fixes those problems and saves the cleaned dataset |
+| 4 | `preprocessing.py` | Shared text cleaning, TF-IDF and train/test split |
+| 5 | `Model/Baseline Model/` | Logistic regression baseline |
+| 6 | `Model/Common Models/` | Decision tree, Random Forest, LightGBM, XGBoost, SVM |
+
+Run steps 1–3 once, in order. The model notebooks can then be run in any order.

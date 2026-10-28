@@ -33,7 +33,7 @@ Files are gzip-compressed to stay under GitHub's 100 MB limit; `pd.read_csv` rea
 
 ## Baseline Model (Logistic Regression)
 
-**Notebook:** `logistic_regression_TF-IDF.ipynb`
+**Notebook:** `Model/Baseline Model/Logistic_regression_TF-IDF.ipynb`
 
 **Why:** logistic regression is interpretable by design. Its coefficients explain predictions directly, so no post-hoc methods are needed.
 
@@ -49,7 +49,7 @@ Files are gzip-compressed to stay under GitHub's 100 MB limit; `pd.read_csv` rea
 
 ## Readable Model (Decision Tree)
 
-**Notebook:** `decision_tree.ipynb`
+**Notebook:** `Model/Common Models/Decision_tree.ipynb`
 
 **Why:** a depth-3 tree can be read and checked in full. Because its true rules are known, it is also used to test whether the explanation methods report them correctly.
 
@@ -59,7 +59,7 @@ Files are gzip-compressed to stay under GitHub's 100 MB limit; `pd.read_csv` rea
 
 ## Black-Box Models (Random Forest, LightGBM, XGBoost, SVM)
 
-**Notebooks:** `random_forest.ipynb`, `LightGBM.ipynb`, `XGBoost.ipynb`, `SVM.ipynb`
+**Notebooks:** `Random_forest.ipynb`, `LightGBM.ipynb`, `XGBoost.ipynb` and `SVM.ipynb`, all in `Model/Common Models/`
 
 **Why:** these models can't be read directly, so they are explained with post-hoc methods.
 
