@@ -85,12 +85,22 @@ Files are gzip-compressed to stay under GitHub's 100 MB limit; `pd.read_csv` rea
 
 ---
 
-## Tier 3: Unique Models (EBM, CatBoost)
-
-*To be added — feature engineering approach still under research.*
-
----
-
 ## Final Comparison
 
-All models are compared in one table: Fake-class recall, accuracy, missed fakes, false alarms and the interpretability approach used. The final discussion covers the accuracy–interpretability trade-off and, using the explanations, what the models actually rely on: writing style versus source fingerprints.
+**Notebook:** `Model/XAI Synthesis/xai_synthesis.ipynb`
+
+**Why:** each model notebook explains one model on its own. This notebook puts all six side by side, to compare what they rely on and to choose one model based on both accuracy and explainability.
+
+**Shared set-up:** the six models are trained again with exactly the same data, split and settings as their own notebooks, so they give the same results. All six are explained with LIME on the same 200 test articles (100 fake, 100 real) with the same settings, so differences come from the models, not from the articles.
+
+**Word groups:** to summarise the explanations, important words are sorted into the project's four word groups (defined in the README): source fingerprints, wire-service style, partisan/casual style and other words.
+
+**Steps:**
+- Train the six models (the SVM is saved to a file after the first run, since it takes about 15 minutes to train)
+- Explain all six models with LIME on the same 200 articles
+- **Same words?** Each model's top words, the share of its LIME weight on each word group, and how similar the models' explanations are to each other
+- **Same story from LIME and SHAP?** How much of SHAP's explanation is about words that are missing from an article (which LIME can't show), and how well the two methods agree on the words that are there
+- **Choosing a model:** one table with every model's accuracy, Fake-class recall, missed fakes and false alarms, next to its reliance on source fingerprints, how concentrated its explanations are, and whether its reasons are exact or estimated
+- Summary, a figure for the report, and all numbers printed in one place
+
+**Outcome:** logistic regression is chosen. It is almost as accurate as the most accurate model (98.0% vs 98.4% for the SVM), its reasons can be read exactly from its coefficients instead of being estimated, and it relies less on source fingerprints than any other model.

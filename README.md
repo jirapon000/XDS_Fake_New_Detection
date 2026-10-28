@@ -55,4 +55,15 @@ The models' worst mistakes show the limit. A fake site republishing a wire-style
 | 5 | `Model/Baseline Model/` | Logistic regression baseline |
 | 6 | `Model/Common Models/` | Decision tree, Random Forest, LightGBM, XGBoost, SVM |
 
+## Word Groups
+
+To compare explanations, the project sorts important words into four groups, used the same way in every notebook:
+
+| Group | Words | What they are |
+|---|---|---|
+| Source fingerprints | reuters, via, image, images, featured, getty, com, http, www, pic, twitter, wire, read, video, watch | Traces of how each site lays out its pages: photo credits ("Featured image via Getty Images"), links, site sign-offs ("21st Century Wire", "READ MORE"), embedded videos ("WATCH", "(VIDEO)") and the publisher's name |
+| Wire-service style | said, told, minister, government, spokesman, presidential, representative, nov, monday to sunday | How Reuters writes: every claim attributed ("said on Tuesday"), formal titles, abbreviated months |
+| Partisan/casual style | just, like, know, don, right, fact, gop, hillary, mr, breaking, even | How the fake sites write: conversational, partisan and headline-style language |
+| Other words | every other word | Topic and content |
+
 Run steps 1–3 once, in order. The model notebooks can then be run in any order.
