@@ -1,3 +1,7 @@
+# Fake News Detection: Explaining What the Models Look At
+
+Insight Lab · Explainable Data Science (XDS 2026) · Asian Institute of Technology
+
 ## Overview
 
 This project applies explainable data science (XDS) techniques to fake news detection. The goal is to understand *why* a model classifies an article as fake or real, rather than treating it as a black box, and to check whether those reasons hold up.
@@ -42,7 +46,15 @@ The readable decision tree also serves as a test case: because its true rules ar
 
 All models separate fake from real well, and the SVM is the most accurate. The explanations show what that accuracy rests on. Every model relies on Reuters' writing style (above all "said", plus weekdays and formal titles) and on the fake sites' page layout. The decision tree's very first question is whether an article contains "via" from a photo credit. LightGBM and XGBoost lean on the photo-credit words three times as much as the Random Forest does, while the SVM spreads its decision over thousands of words and barely depends on any single one.
 
-The models' worst mistakes show the limit. A fake site republishing a wire-style report gets through, and a real article written casually gets flagged. The models have learned to tell Reuters from these particular fake sites, which works very well within this dataset, but they judge how an article is written and laid out, not whether what it says is true. **The model we chose is logistic regression.** The SVM is slightly more accurate (0.984 vs 0.980), and `xai_evaluation.ipynb` shows that lead is real, not luck. But the gain is small: 21 fewer missed fakes out of 3,489. Logistic regression explains itself exactly through its coefficients, and it relies least on the fake sites' page layout (photo-credit and link words make up 14% of its top words, against 20% for the SVM). For a gap that small, being able to see exactly why each article was flagged is worth more.
+The models' worst mistakes show the limit. A fake site republishing a wire-style report gets through, and a real article written casually gets flagged. The models have learned to tell Reuters from these particular fake sites, which works very well within this dataset, but they judge how an article is written and laid out, not whether what it says is true.
+
+## Which Model We Explain and Which We Recommend
+
+**The model we explain and test is the SVM, but the model we recommend deploying is logistic regression.**
+
+The SVM is the most accurate model, and its reasoning can't be read directly: each decision compares an article with 7,865 stored training articles across 5,000 words, so no single number belongs to a word. That makes it the model whose explanations need testing, which `xai_evaluation.ipynb` does (faithfulness, stability, counterfactuals and ethics).
+
+Its lead over logistic regression is real but small. `xai_evaluation.ipynb` shows the gap is not luck (the SVM is right on 33 of the 40 test articles where the two disagree, p = 0.00004), but it amounts to 21 fewer missed fakes out of 3,489. Logistic regression explains itself exactly through its coefficients, and it relies least of all six models on source fingerprints (14% of its LIME weight, against 20% for the SVM). For a gap that small, being able to see exactly why each article was flagged is worth more.
 
 ## Project Structure
 
@@ -54,7 +66,9 @@ The models' worst mistakes show the limit. A fake site republishing a wire-style
 | 4 | `preprocessing.py` | Shared text cleaning, TF-IDF and train/test split |
 | 5 | `Model/Baseline Model/` | Logistic regression baseline |
 | 6 | `Model/Common Models/` | Decision tree, Random Forest, LightGBM, XGBoost, SVM |
-| 7 | `Model/XAI Evaluation/` | Checks whether the SVM's lead over logistic regression is real, and whether LIME and SHAP can be trusted (faithfulness, stability, counterfactuals, ethics) |
+| 7 | `Model/XAI Synthesis/` | Compares the explanations of all six models side by side and recommends a model |
+| 8 | `Model/XAI Evaluation/` | Checks whether the SVM's lead over logistic regression is real, and whether LIME and SHAP can be trusted (faithfulness, stability, counterfactuals, ethics) |
+| – | `MODEL_CARD.md` | Intended use, training data, evaluation results and known limitations |
 
 ## Word Groups
 
@@ -67,4 +81,10 @@ To compare explanations, the project sorts important words into four groups, use
 | Opinion words | just, like, know, don, right, fact, gop, hillary, mr, breaking, even | How the fake sites write: conversational, partisan and headline-style language |
 | Other words | every other word | Topic and content |
 
-Run steps 1–3 once, in order. The model notebooks can then be run in any order.
+## How to Run
+
+1. Install the pinned dependencies: `pip install -r requirements.txt` (Python 3.14.2).
+2. Run steps 1–3 once, in order. They create the cleaned dataset that every later notebook uses.
+3. Run steps 5–8 in any order. Each one loads the cleaned dataset and trains its own models.
+
+All splits, models and explanation methods use the fixed seed `RANDOM_STATE = 42`, set in `preprocessing.py`. The SVM takes several minutes to train, so the two XAI notebooks save it to a `.joblib` file on the first run and reload it after that. Delete that file to retrain from scratch.

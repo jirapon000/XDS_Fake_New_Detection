@@ -3,3 +3,4 @@ env_w2v/
 __pycache__/
 .ipynb_checkpoints/
 *.joblib
+Model/Human Study/human_eval/
