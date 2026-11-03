@@ -1,6 +1,6 @@
 """
 Shared preprocessing pipeline for Fake News Detection project.
-All model notebooks (baseline + Tier 2) must import from here to ensure
+All model notebooks (baseline + decision tree + black box model) must import from here to ensure
 identical preprocessing, TF-IDF settings, and train/test split across models.
 
 Row-level cleaning (duplicates, empty texts, Reuters dateline) is done once in

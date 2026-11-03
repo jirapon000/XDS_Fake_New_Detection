@@ -1,10 +1,8 @@
 # Fake News Detection: Explaining What the Models Look At
 
-Insight Lab · Explainable Data Science (XDS 2026) · Asian Institute of Technology
-
 ## Overview
 
-This project applies explainable data science (XDS) techniques to fake news detection. The goal is to understand *why* a model classifies an article as fake or real, rather than treating it as a black box, and to check whether those reasons hold up.
+This project applies explainable data science (XDS) techniques to fake news detection. The goal is to understand *why* a model classifies an article as fake or real, rather than treating it as a black box, and to check whether those reasons hold up. A high accuracy alone doesn't mean a model can be trusted: it could be right for the wrong reasons, such as recognising a website's layout instead of reading what the article says. So we look past accuracy and ask two more questions: what is each model actually relying on, and can we trust the explanations that tell us.
 
 ## Dataset
 
@@ -18,11 +16,11 @@ The EDA found that `subject` and `date` each give the label away, so they are ne
 
 ## Models
 
-Each article's title and text are converted into TF-IDF word features (`preprocessing.py`). We train an interpretable baseline (logistic regression), a shallow decision tree that can be read in full, and four more complex models: Random Forest, LightGBM, XGBoost and an RBF-kernel SVM. All models share the same features and train/test split and are evaluated mainly on Fake-class recall, the share of fake articles caught.
+Each article's title and text are converted into TF-IDF word features (`preprocessing.py`). We train an interpretable baseline (logistic regression), a shallow decision tree (depth = 3) that can be read in full, and four black box models: Random Forest, LightGBM, XGBoost and an RBF-kernel SVM. All models share the same features and train/test split and are evaluated mainly on Fake-class recall, the share of fake articles caught.
 
 ## Explanation pipeline
 
-Each complex model is explained with the same pipeline:
+Each bkack box model is explained with the same pipeline:
 
 - **Global importance:** grouped Permutation Feature Importance (with a random-term check to separate real effects from noise) and SHAP (TreeSHAP for tree models, KernelSHAP for the SVM)
 - **Feature effects:** ALE
@@ -54,7 +52,9 @@ The models' worst mistakes show the limit. A fake site republishing a wire-style
 
 The SVM is the most accurate model, and its reasoning can't be read directly: each decision compares an article with 7,865 stored training articles across 5,000 words, so no single number belongs to a word. That makes it the model whose explanations need testing, which `xai_evaluation.ipynb` does (faithfulness, stability, counterfactuals and ethics).
 
-Its lead over logistic regression is real but small. `xai_evaluation.ipynb` shows the gap is not luck (the SVM is right on 33 of the 40 test articles where the two disagree, p = 0.00004), but it amounts to 21 fewer missed fakes out of 3,489. Logistic regression explains itself exactly through its coefficients, and it relies least of all six models on source fingerprints (14% of its LIME weight, against 20% for the SVM). For a gap that small, being able to see exactly why each article was flagged is worth more.
+Its lead over logistic regression is real but small. `xai_evaluation.ipynb` shows the gap is not luck (the SVM is right on 33 of the 40 test articles where the two disagree, p = 0.00004), but it amounts to 21 fewer missed fakes out of 3,489. Logistic regression explains itself exactly through its coefficients, and it relies least of all six models on source fingerprints (14% of its LIME weight, against 20% for the SVM). For a gap that small, being able to see exactly why each article was flagged is worth more. The SVM also takes minutes to train instead of seconds, and its explanations are slow, approximate estimates, while logistic regression's are exact. A gain of 21 articles isn't worth a black box that is slower to train, run and explain.
+
+For intended use, limitations, ethics and the full evaluation, see `MODEL_CARD.md`.
 
 ## Project Structure
 
@@ -68,6 +68,8 @@ Its lead over logistic regression is real but small. `xai_evaluation.ipynb` show
 | 6 | `Model/Common Models/` | Decision tree, Random Forest, LightGBM, XGBoost, SVM |
 | 7 | `Model/XAI Synthesis/` | Compares the explanations of all six models side by side and recommends a model |
 | 8 | `Model/XAI Evaluation/` | Checks whether the SVM's lead over logistic regression is real, and whether LIME and SHAP can be trusted (faithfulness, stability, counterfactuals, ethics) |
+| 9 | `Model/Human Study/` | Study with real people: does seeing the LIME highlights help them predict the model? |
+| – | `run_all.py` | Re-runs every notebook in order and saves all figures to `figures/` |
 | – | `MODEL_CARD.md` | Intended use, training data, evaluation results and known limitations |
 
 ## Word Groups
@@ -83,8 +85,16 @@ To compare explanations, the project sorts important words into four groups, use
 
 ## How to Run
 
-1. Install the pinned dependencies: `pip install -r requirements.txt` (Python 3.14.2).
-2. Run steps 1–3 once, in order. They create the cleaned dataset that every later notebook uses.
-3. Run steps 5–8 in any order. Each one loads the cleaned dataset and trains its own models.
+Install the pinned dependencies (Python 3.14.2):
+
+    pip install -r requirements.txt
+
+**Everything in one command.** From the project root, run:
+
+    python run_all.py
+
+This re-runs every notebook in order (combine → EDA → clean → models → synthesis → evaluation) and saves every plot as a PNG in `figure/`, one folder per notebook. To re-run a single notebook, use `python run_all.py --only SVM`. To save figures without re-running, use `python run_all.py --figures-only`.
+
+**By hand.** Run steps 1–3 once, in order: they create the cleaned dataset that every later notebook uses. Then run steps 5–8 in any order; each one loads the cleaned dataset and trains its own models. Step 9 (the human study) is run separately, because it needs answers from real participants.
 
 All splits, models and explanation methods use the fixed seed `RANDOM_STATE = 42`, set in `preprocessing.py`. The SVM takes several minutes to train, so the two XAI notebooks save it to a `.joblib` file on the first run and reload it after that. Delete that file to retrain from scratch.

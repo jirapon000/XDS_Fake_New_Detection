@@ -96,10 +96,10 @@ These checks were run on the SVM's explanations unless stated otherwise (`Model/
 | Faithfulness: KernelSHAP setup on logistic regression (50 articles) | Within 0.01 of the exact answer for 92% of articles |
 | Faithfulness: LIME and TreeSHAP on the depth-3 tree (100 articles) | Median 99.4% of LIME's weight on the tree's 5 terms; TreeSHAP exactly 0 on the other 4,995 |
 | Faithfulness: deleting words on the SVM (100 articles) | Deleting LIME's top words moves the score 19.5× as far as random words (0.85 vs 0.04); 31% vs 1% of predictions flip after 10 deletions |
-| Stability: LIME across seeds (20 articles) | Top-5 overlap 0.78 at 500 samples (worst 0.59) and 0.88 at 2,000 (worst 0.65); same top word 91% / 94% |
+| Stability: LIME across seeds (20 articles) | Top-5 overlap 0.78 at 500 samples (worst 0.59) and 0.87 at 2,000 (worst 0.65); same top word 91% / 94% |
 | Stability: KernelSHAP across seeds | Top-5 overlap 0.99 |
-| Stability: small edits (deleting 5% of unimportant words) | Top-5 overlap 0.84, against 0.88 between seeds; same top word 92% |
-| Human evidence | [team: add forward-simulation results, sample size and participant comments] |
+| Stability: small edits (deleting 5% of unimportant words) | Top-5 overlap 0.88, the same as between seeds (0.87); same top word 92% |
+| Human evidence (`Model/Human Study/human_study.ipynb`) | [team: add forward-simulation results, sample size and participant comments] |
 
 **For the reviewer:** the top one or two words of a LIME explanation can be trusted. Words further down the list are a rough guide only. Any explanation shown to a reviewer should use at least 2,000 samples.
 
@@ -137,7 +137,7 @@ These checks were run on the SVM's explanations unless stated otherwise (`Model/
 
 ## Reproducibility
 
-- **Running order:** `combine_dataset.ipynb` → `clean_dataset.ipynb` → the model notebooks → `Model/XAI Synthesis/xai_synthesis.ipynb` → `Model/XAI Evaluation/xai_evaluation.ipynb`.
+- **Running order:** `combine_dataset.ipynb` → `clean_dataset.ipynb` → the model notebooks → `Model/XAI Synthesis/xai_synthesis.ipynb` → `Model/XAI Evaluation/xai_evaluation.ipynb`. `python run_all.py` runs them all in this order and saves every figure to `figure/`. The human study (`Model/Human Study/human_study.ipynb`) is run separately, because it needs real participants.
 - **Environment:** Python 3.14.2. Dependencies are pinned in `requirements.txt`, including scikit-learn 1.9.1, lightgbm 4.7.0, xgboost 3.4.1, shap 0.53.0, lime 0.2.0.1 and nltk 3.10.3.
 - **Seed:** `RANDOM_STATE = 42` everywhere.
 - **SVM caching:** the SVM takes several minutes to train. It is saved to a `.joblib` file on first run; delete that file to retrain from scratch.
