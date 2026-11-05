@@ -1,0 +1,11 @@
+item,outcome,model_output,true_label,svm_decision_value,highlighted_in_form,title
+1,FP,fake,real,0.258,A,"As West frowns on Putin, young Russians learn the military way"
+2,FP,fake,real,0.15,A,Obamas donated less to charities in 2015 as income slipped
+3,TN,real,real,-0.888,A,Philippines' Duterte's son quits as vice mayor of hometown Davao
+4,TN,real,real,-1.33,A,Russian security service says dismantles Islamic State sleeper cell
+5,TP,fake,fake,0.257,A,BREAKING: Ecuadorian Embassy Admits They Cut Wikileaks Internet After Pressure From John Kerry
+6,TP,fake,fake,1.907,B,WATCH: THE VIEW’s LIBERAL HAGS Attack Meghan McCain For Defending Flag On Her First Day As New Co-Host
+7,FN,real,fake,-0.135,B,BREAKING: Iran Publicly Humiliates Obama…Unveils Second Underground Missile Capable Of Carrying Nuclear Warhead
+8,TP,fake,fake,0.819,B,Mitch McConnell: The Republican Platform Won’t Be Written By Trump (VIDEO)
+9,FN,real,fake,-0.115,B,UNREAL! FORMER GITMO DETAINEES PROTEST AT U.S. EMBASSY FOR FREEBIES FROM THE U.S.
+10,TN,real,real,-2.156,B,Congress watchdog to investigate Trump voter fraud panel
