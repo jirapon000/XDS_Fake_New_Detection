@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project applies explainable data science (XDS) techniques to fake news detection. The goal is to understand *why* a model classifies an article as fake or real, rather than treating it as a black box, and to check whether those reasons hold up. A high accuracy alone doesn't mean a model can be trusted: it could be right for the wrong reasons, such as recognising a website's layout instead of reading what the article says. So we look past accuracy and ask two more questions: what is each model actually relying on, and can we trust the explanations that tell us.
+This project was developed by Insight Lab, a class project group, and applies explainable data science (XDS) techniques to fake news detection. The goal is to understand *why* a model classifies an article as fake or real, rather than treating it as a black box, and to check whether those reasons hold up. A black-box model is typically judged only by performance metrics such as accuracy, precision, and recall, which can lead us to trust it without knowing how it reaches its decisions. But high accuracy alone doesn't mean a model can be trusted: it could be right for the wrong reasons, such as recognising a website's layout instead of reading what the article says. So we look past these metrics and ask two more questions: what is each model actually relying on, and can we trust the explanations that tell us?
 
 ## Dataset
 

@@ -28,6 +28,7 @@ NOTEBOOKS = [
     "Model/Common Models/SVM.ipynb",
     "Model/XAI Synthesis/xai_synthesis.ipynb",
     "Model/XAI Evaluation/xai_evaluation.ipynb",
+    "Model/Human Study/human_study.ipynb",
 ]
 FIG_DIR = "figures"
 

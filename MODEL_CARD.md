@@ -37,7 +37,7 @@ The other four models (decision tree of depth 3, Random Forest, LightGBM and XGB
 ## Training Data
 
 - **Source:** the ISOT Fake News Dataset (Ahmed et al., 2017, 2018), from the Kaggle mirror "Fake and Real News Dataset" (Bisaillon, 2020).
-- **Licence:** [team: add the licence shown on the Kaggle page]
+- **Licence:** CC BY-NC-SA 4.0 (non-commercial; commercial deployment would need permission or different training data)
 - **Raw size:** 44,898 articles. 21,417 real articles come from Reuters and 23,481 fake articles come from websites flagged as unreliable. Most cover politics and world news, 2015–2018.
 - **Labels:** taken from which file an article is in. Labels describe the *source*, not a fact-check of each article.
 
@@ -96,10 +96,11 @@ These checks were run on the SVM's explanations unless stated otherwise (`Model/
 | Faithfulness: KernelSHAP setup on logistic regression (50 articles) | Within 0.01 of the exact answer for 92% of articles |
 | Faithfulness: LIME and TreeSHAP on the depth-3 tree (100 articles) | Median 99.4% of LIME's weight on the tree's 5 terms; TreeSHAP exactly 0 on the other 4,995 |
 | Faithfulness: deleting words on the SVM (100 articles) | Deleting LIME's top words moves the score 19.5× as far as random words (0.85 vs 0.04); 31% vs 1% of predictions flip after 10 deletions |
-| Stability: LIME across seeds (20 articles) | Top-5 overlap 0.78 at 500 samples (worst 0.59) and 0.87 at 2,000 (worst 0.65); same top word 91% / 94% |
-| Stability: KernelSHAP across seeds | Top-5 overlap 0.99 |
-| Stability: small edits (deleting 5% of unimportant words) | Top-5 overlap 0.88, the same as between seeds (0.87); same top word 92% |
-| Human evidence (`Model/Human Study/human_study.ipynb`) | [team: add forward-simulation results, sample size and participant comments] |
+| Stability: LIME across seeds (20 articles, 5 seeds) | Top-5 overlap 0.78 at 500 samples and 0.88 at 2,000; same top word 90% / 94% |
+| Stability: KernelSHAP across seeds | Top-5 overlap 0.99 at 500 samples and 1.00 at 2,000 |
+| Stability: small edits (5% of words deleted, SVM score moved < 0.05) | Top-5 overlap 0.80 for LIME and 0.95 for KernelSHAP; same top word 83% / 95% |
+| Stability: grouped PFI across 5 seeds | Rankings vary (Spearman 0.51, top-5 overlap 0.45), because almost all SVM importances are near zero |
+| Human evidence (Model/Human Study/human_study.ipynb) | 10 participants (5 per form), 100 answers: predicted the SVM correctly 68% of the time with LIME highlights vs 52% without; 90% vs 63% when the SVM was right, 35% vs 35% when it was wrong; no significance claimed |
 
 **For the reviewer:** the top one or two words of a LIME explanation can be trusted. Words further down the list are a rough guide only. Any explanation shown to a reviewer should use at least 2,000 samples.
 
